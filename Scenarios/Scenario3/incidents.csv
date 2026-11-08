@@ -1,0 +1,21 @@
+incident_id,location,priority,deadline,required_capability,timestamp,time_required
+I1,N1,Critical,800,Medical emergency,0,15
+I2,N7,High,900,Traffic control,0,20
+I3,N17,Critical,1550,Rescue,0,35
+I4,N8,High,600,First aid,0,30
+I5,N5,Critical,1350,Pumping operations,0,45
+I6,N10,High,2500,Rescue,60,35
+I7,N3,High,1100,First aid,120,20
+I8,N4,Critical,3000,Evacuation,360,40
+I9,N9,Medium,2700,Security,600,25
+I10,N5,High,2600,Rescue,1140,35
+I11,N8,Critical,1700,Medical emergency,1140,20
+I12,N12,Medium,2800,Security,1500,20
+I13,N6,High,5600,Fire suppression,2750,30
+I14,N3,Critical,3800,Medical emergency,3000,20
+I15,N10,Medium,5200,Traffic control,3250,20
+I16,N7,High,5100,Rescue,4200,30
+I17,N4,Critical,6000,Evacuation,4500,35
+I18,N1,High,6500,First aid,4600,20
+I19,N9,Medium,7500,Law enforcement,5000,25
+I20,N8,Critical,6500,Medical emergency,5000,20

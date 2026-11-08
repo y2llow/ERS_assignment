@@ -1,0 +1,5 @@
+responder_id,type,start_location,capabilities,availability,time_until_available
+R1,FireTruck,N1,Fire suppression;Rescue,Available,0
+R2,Ambulance,H1,Medical emergency;First aid,Available,0
+R3,PoliceUnit,N2,Traffic control;Security;Evacuation,Available,0
+R4,Ambulance,N3,Medical emergency;First aid,Busy,10

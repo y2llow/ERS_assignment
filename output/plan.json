@@ -1,0 +1,23 @@
+//The file plan.json should contain a list of responder–incident assignments. Each assignment should include:
+//• the assigned responder;
+//• the incident being handled;
+//• the selected route through the graph;
+//• the simulation time at which the responder starts the assignment.
+//Use the following JSON structure:
+//[
+//{
+//" responder_id ": " R1 " ,
+//" incident_id ": " I1 " ,
+//" path ": [" N1 " , " H1 " , " N2 "] ,
+//" time ": 0
+//} ,
+//{
+//" responder_id ": " R2 " ,
+//" incident_id ": " I2 " ,
+//" path ": [" H1 " , " N2 "] ,
+//" time ": 10
+//}
+//]
+//The generated plan must be valid. You are responsible for defining the checks needed to establish whether
+//routes and assignments are valid under the assignment’s operational constraints. Identify possible errors,
+//test for them, and explain any limitations of your validation.

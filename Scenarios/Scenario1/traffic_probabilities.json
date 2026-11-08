@@ -1,0 +1,43 @@
+{
+  "initial": {
+    "Low": 0.60,
+    "Medium": 0.30,
+    "High": 0.10
+  },
+
+  "transition": {
+    "Low": {
+      "Low": 0.80,
+      "Medium": 0.18,
+      "High": 0.02
+    },
+    "Medium": {
+      "Low": 0.15,
+      "Medium": 0.70,
+      "High": 0.15
+    },
+    "High": {
+      "Low": 0.05,
+      "Medium": 0.20,
+      "High": 0.75
+    }
+  },
+
+  "emission": {
+    "Low": {
+      "Low": 0.85,
+      "Medium": 0.14,
+      "High": 0.01
+    },
+    "Medium": {
+      "Low": 0.10,
+      "Medium": 0.80,
+      "High": 0.10
+    },
+    "High": {
+      "Low": 0.02,
+      "Medium": 0.18,
+      "High": 0.80
+    }
+  }
+}

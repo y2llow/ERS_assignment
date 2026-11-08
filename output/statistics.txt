@@ -1,0 +1,15 @@
+The file statistics.txt should summarize the system’s performance and include at least:
+• number of incidents handled;
+• number of responders used;
+• average response time;
+• percentage of deadlines met.
+Explain how you calculate these statistics, including how you treat incidents that remain unhandled. Clearly
+state the time units used.
+An example of the expected output is:
+4
+Artificial Intelligence Practicum Emergency Response Assignment
+System statistics :
+* 5 incidents handled
+* 2 responders used
+* Average response time : 65.7 s
+* Deadlines met : 100.0%

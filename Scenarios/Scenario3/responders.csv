@@ -1,0 +1,11 @@
+responder_id,type,start_location,capabilities,availability,time_until_available
+R1,Ambulance,H1,Medical emergency;First aid;CPR,Available,0
+R2,Ambulance,H1,CPR;First aid;Life support,Available,0
+R3,Ambulance,H2,Medical emergency;First aid;CPR,Available,0
+R4,Ambulance,H2,CPR;First aid;Life support,Available,0
+R5,FireTruck,N5,Fire suppression;Rescue;Evacuation,Available,0
+R6,FireTruck,F1,Pumping operations;Rescue;Evacuation,Available,0
+R7,FireTruck,F2,Fire suppression;Rescue;Evacuation,Available,0
+R8,FireTruck,F2,Pumping operations;Rescue;Evacuation,Available,0
+R9,PoliceUnit,P1,Traffic control;Security;Law enforcement,Available,0
+R10,PoliceUnit,P2,Traffic control;Security;Law enforcement,Available,0

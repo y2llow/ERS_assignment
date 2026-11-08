@@ -1,0 +1,608 @@
+{
+  "nodes": [
+    {
+      "id": "N1",
+      "name": "Node 1",
+      "x": 5760,
+      "y": 5871,
+      "type": "normal"
+    },
+    {
+      "id": "N2",
+      "name": "Node 2",
+      "x": 8319,
+      "y": 1587,
+      "type": "normal"
+    },
+    {
+      "id": "N3",
+      "name": "Node 3",
+      "x": 5457,
+      "y": 2707,
+      "type": "normal"
+    },
+    {
+      "id": "N4",
+      "name": "Node 4",
+      "x": 8102,
+      "y": 7916,
+      "type": "normal"
+    },
+    {
+      "id": "N5",
+      "name": "Node 5",
+      "x": 53,
+      "y": 153,
+      "type": "normal"
+    },
+    {
+      "id": "N6",
+      "name": "Node 6",
+      "x": 4687,
+      "y": 5969,
+      "type": "normal"
+    },
+    {
+      "id": "N7",
+      "name": "Node 7",
+      "x": 1827,
+      "y": 4271,
+      "type": "normal"
+    },
+    {
+      "id": "N8",
+      "name": "Node 8",
+      "x": 7704,
+      "y": 3063,
+      "type": "normal"
+    },
+    {
+      "id": "N9",
+      "name": "Node 9",
+      "x": 3271,
+      "y": 4365,
+      "type": "normal"
+    },
+    {
+      "id": "N10",
+      "name": "Node 10",
+      "x": 3595,
+      "y": 3872,
+      "type": "normal"
+    },
+    {
+      "id": "N11",
+      "name": "Node 11",
+      "x": 8081,
+      "y": 7040,
+      "type": "normal"
+    },
+    {
+      "id": "N12",
+      "name": "Node 12",
+      "x": 9582,
+      "y": 9627,
+      "type": "normal"
+    },
+    {
+      "id": "N13",
+      "name": "Node 13",
+      "x": 2813,
+      "y": 2694,
+      "type": "normal"
+    },
+    {
+      "id": "N14",
+      "name": "Node 14",
+      "x": 5265,
+      "y": 1247,
+      "type": "normal"
+    },
+    {
+      "id": "N15",
+      "name": "Node 15",
+      "x": 7084,
+      "y": 1402,
+      "type": "normal"
+    },
+    {
+      "id": "N16",
+      "name": "Node 16",
+      "x": 9546,
+      "y": 8087,
+      "type": "normal"
+    },
+    {
+      "id": "N17",
+      "name": "Node 17",
+      "x": 8511,
+      "y": 674,
+      "type": "normal"
+    },
+    {
+      "id": "N18",
+      "name": "Node 18",
+      "x": 4276,
+      "y": 8206,
+      "type": "normal"
+    },
+    {
+      "id": "N19",
+      "name": "Node 19",
+      "x": 7751,
+      "y": 7936,
+      "type": "normal"
+    },
+    {
+      "id": "N20",
+      "name": "Node 20",
+      "x": 2945,
+      "y": 6166,
+      "type": "normal"
+    },
+    {
+      "id": "H1",
+      "name": "Hospital 1",
+      "x": 1099,
+      "y": 8937,
+      "type": "hospital"
+    },
+    {
+      "id": "H2",
+      "name": "Hospital 2",
+      "x": 4982,
+      "y": 2323,
+      "type": "hospital"
+    },
+    {
+      "id": "P1",
+      "name": "Police 1",
+      "x": 7940,
+      "y": 1532,
+      "type": "police"
+    },
+    {
+      "id": "P2",
+      "name": "Police 2",
+      "x": 5423,
+      "y": 8720,
+      "type": "police"
+    },
+    {
+      "id": "F1",
+      "name": "Fire Department 1",
+      "x": 6254,
+      "y": 9137,
+      "type": "fire_station"
+    },
+    {
+      "id": "F2",
+      "name": "Fire Department 2",
+      "x": 2971,
+      "y": 7512,
+      "type": "fire_station"
+    }
+  ],
+  "roads": [
+    {
+      "from": "N5",
+      "to": "N16",
+      "distance": 15191,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N16",
+      "to": "N5",
+      "distance": 15191,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N5",
+      "to": "H2",
+      "distance": 7034,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "H2",
+      "to": "N5",
+      "distance": 7034,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "H2",
+      "to": "P2",
+      "distance": 8822,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "P2",
+      "to": "H2",
+      "distance": 8822,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "P2",
+      "to": "N12",
+      "distance": 5466,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N12",
+      "to": "P2",
+      "distance": 5466,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N5",
+      "to": "N8",
+      "distance": 10985,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N8",
+      "to": "N5",
+      "distance": 10985,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N16",
+      "to": "N17",
+      "distance": 10365,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N17",
+      "to": "N16",
+      "distance": 10365,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N5",
+      "to": "N3",
+      "distance": 7462,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N3",
+      "to": "N5",
+      "distance": 7462,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N3",
+      "to": "N19",
+      "distance": 7216,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N19",
+      "to": "N3",
+      "distance": 7216,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N12",
+      "to": "N6",
+      "distance": 8215,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N6",
+      "to": "N12",
+      "distance": 8215,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N19",
+      "to": "N14",
+      "distance": 9650,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N14",
+      "to": "N19",
+      "distance": 9650,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N3",
+      "to": "N4",
+      "distance": 7180,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N4",
+      "to": "N3",
+      "distance": 7180,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "H2",
+      "to": "N7",
+      "distance": 4782,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N7",
+      "to": "H2",
+      "distance": 4782,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "H2",
+      "to": "N13",
+      "distance": 3013,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N13",
+      "to": "H2",
+      "distance": 3013,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N14",
+      "to": "H1",
+      "distance": 11496,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "H1",
+      "to": "N14",
+      "distance": 11496,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N6",
+      "to": "N15",
+      "distance": 6277,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N15",
+      "to": "N6",
+      "distance": 6277,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N7",
+      "to": "P1",
+      "distance": 8732,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "P1",
+      "to": "N7",
+      "distance": 8732,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N7",
+      "to": "N20",
+      "distance": 2979,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N20",
+      "to": "N7",
+      "distance": 2979,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N6",
+      "to": "F1",
+      "distance": 4726,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "F1",
+      "to": "N6",
+      "distance": 4726,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N7",
+      "to": "N2",
+      "distance": 9324,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N2",
+      "to": "N7",
+      "distance": 9324,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N6",
+      "to": "N18",
+      "distance": 2988,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N18",
+      "to": "N6",
+      "distance": 2988,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N4",
+      "to": "N9",
+      "distance": 7470,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N9",
+      "to": "N4",
+      "distance": 7470,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N20",
+      "to": "N1",
+      "distance": 3886,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N1",
+      "to": "N20",
+      "distance": 3886,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N16",
+      "to": "N10",
+      "distance": 8672,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N10",
+      "to": "N16",
+      "distance": 8672,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "P2",
+      "to": "F2",
+      "distance": 3697,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "F2",
+      "to": "P2",
+      "distance": 3697,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N2",
+      "to": "N11",
+      "distance": 6090,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N11",
+      "to": "N2",
+      "distance": 6090,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "H1",
+      "to": "N8",
+      "distance": 12055,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "N8",
+      "to": "H1",
+      "distance": 12055,
+      "road_type": "main",
+      "speed": 30
+    },
+    {
+      "from": "H1",
+      "to": "N9",
+      "distance": 5838,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N9",
+      "to": "H1",
+      "distance": 5838,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N9",
+      "to": "N2",
+      "distance": 7424,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N2",
+      "to": "N9",
+      "distance": 7424,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N9",
+      "to": "N17",
+      "distance": 7875,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N17",
+      "to": "N9",
+      "distance": 7875,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "N3",
+      "to": "P1",
+      "distance": 3318,
+      "road_type": "secondary",
+      "speed": 15
+    },
+    {
+      "from": "P1",
+      "to": "N3",
+      "distance": 3318,
+      "road_type": "secondary",
+      "speed": 15
+    }
+  ]
+}

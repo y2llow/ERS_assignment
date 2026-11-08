@@ -1,0 +1,75 @@
+{
+  "weather_prior": {
+    "Clear": 0.50,
+    "Rain": 0.30,
+    "Storm": 0.20
+  },
+  "road_status_given_weather": {
+    "Clear": {
+      "Open": 0.95,
+      "Congested": 0.04,
+      "Blocked": 0.01
+    },
+    "Rain": {
+      "Open": 0.60,
+      "Congested": 0.30,
+      "Blocked": 0.10
+    },
+    "Storm": {
+      "Open": 0.15,
+      "Congested": 0.35,
+      "Blocked": 0.50
+    }
+  },
+  "citizen_report": {
+    "Open": {
+      "Open": 0.70,
+      "Congested": 0.20,
+      "Blocked": 0.10
+    },
+    "Congested": {
+      "Open": 0.20,
+      "Congested": 0.60,
+      "Blocked": 0.20
+    },
+    "Blocked": {
+      "Open": 0.10,
+      "Congested": 0.20,
+      "Blocked": 0.70
+    }
+  },
+  "police_report": {
+    "Open": {
+      "Open": 0.92,
+      "Congested": 0.06,
+      "Blocked": 0.02
+    },
+    "Congested": {
+      "Open": 0.08,
+      "Congested": 0.84,
+      "Blocked": 0.08
+    },
+    "Blocked": {
+      "Open": 0.02,
+      "Congested": 0.08,
+      "Blocked": 0.90
+    }
+  },
+  "sensor_report": {
+    "Open": {
+      "Open": 0.88,
+      "Congested": 0.10,
+      "Blocked": 0.02
+    },
+    "Congested": {
+      "Open": 0.10,
+      "Congested": 0.80,
+      "Blocked": 0.10
+    },
+    "Blocked": {
+      "Open": 0.03,
+      "Congested": 0.07,
+      "Blocked": 0.90
+    }
+  }
+}
