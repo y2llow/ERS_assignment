@@ -35,6 +35,13 @@ def run_application(scenario_path):
         print("\nInput validation successful.")
         print("Planning components are not implemented yet.")
 
+        #removable
+        from src.road_reasoning import RoadConditionModel
+
+        road_model = RoadConditionModel.from_scenario(data)
+        print(road_model.get("H1", "N3"))  # voor Scenario1: bijna zeker Blocke
+        #removable
+
     except ScenarioDataError as error:
         print(f"\nScenario loading failed: {error}")
         raise SystemExit(1)
