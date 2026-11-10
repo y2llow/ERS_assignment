@@ -1,20 +1,3 @@
-# Scenario data
-
-Each scenario folder is a complete input dataset.
-
-## Units
-
-- Coordinates and road `distance`: metres.
-- Road `speed`: metres per second (30 on main roads, 15 on secondary roads).
-- All simulation times and durations: seconds, including incident timestamps, arrival deadlines, handling durations, responder availability, and assignment start times. Fractional seconds are allowed.
-
-## Interpretation
-
-- Road reports are available at time 0. Weather is local to the reported road.
-- Traffic observations are historical and available before time 0. `observation_nr` orders a separate sequence for each directed road; it is not a simulation timestamp.
-- Traffic levels (Low/Medium/High) differ from road statuses (Open/Congested/Blocked). Define and justify how traffic affects your planning; no fixed traffic multipliers are prescribed.
-
-Document and defend any additional assumptions.
 # Emergency Response System (ERS) – AI Practicum
 
 Decision-support system that assigns emergency responders to incidents after a storm and
@@ -22,28 +5,44 @@ plans their routes under uncertain road conditions.
 
 ## Install
 
-Python 3.10 or newer. The system itself only uses the standard library.
-Only the tests need an extra package:
+Python 3.10 or newer. The system itself only uses the standard library; only the tests need `pytest`.
+
+    git clone https://github.com/y2llow/ERS_assignment.git
+    cd ERS_assignment
+
+    # optional: virtual environment
+    python -m venv .venv
+    source .venv/bin/activate        # Windows: .venv\Scripts\activate
 
     pip install pytest
 
 ## Run
 
+    python run.py                                   # default: Scenarios/Scenario1
     python run.py Scenarios/Scenario1
-    python run.py Scenarios/Scenario2 --output output
+    python run.py Scenarios/Scenario2
     python run.py Scenarios/Scenario3
+    python run.py Scenarios/Scenario3 --output out3  # write to another directory
+
+(Use `python3` instead of `python` if that is how Python is installed on your system.)
 
 `run.py` writes two files to the output directory (default `output/`, overwritten on every run):
 
-- `plan.json`      – list of `{responder_id, incident_id, path, time}` (time = departure, seconds)
-- `statistics.txt` – incidents handled, responders used, average response time (s), deadlines met (%)
+- `plan.json`      - list of `{responder_id, incident_id, path, time}` (time = departure, seconds)
+- `statistics.txt` - incidents handled, responders used, average response time (s), deadlines met (%)
 
 The generated plan is checked by `src/validator.py` before it is accepted; the run exits with
 code 1 if the plan is invalid. All times are in seconds, distances in metres, speeds in m/s.
 
 ## Tests
 
-    python -m pytest tests -v
+Run all commands from the project root.
+
+    python -m pytest tests -v                                # everything
+    python -m pytest tests/test_responder_allocator.py -v    # one file
+    python -m pytest tests -q                                # short output
+
+Tests that use the provided scenarios are skipped if the `Scenarios/` folder is missing.
 
 ## How it works (pipeline in `src/application.py`)
 
