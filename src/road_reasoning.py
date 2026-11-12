@@ -117,9 +117,6 @@ def estimate_road_conditions(
             for status in STATUSES:
                 mixed[status] += posterior[status] * count / len(rows)
 
-        #TODO here u can change the rounding from bayes
-        for status in STATUSES:
-            mixed[status] = round(mixed[status],3)
 
         estimates[key] = mixed
 
