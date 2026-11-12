@@ -40,6 +40,8 @@ Assumptions (document in the report):
     - The deadline is the latest ARRIVAL time (arrival <= deadline is allowed).
     - Being allocated now and waiting for a better responder later is not considered
       (the simulation is online: it does not know future incidents).
+    - If a route is at most 2 seconds late, a deadline-aware route fallback may
+      try roads with higher blockage probability, up to the planner's limit.
 """
 
 from __future__ import annotations
@@ -139,6 +141,11 @@ def allocate(
         any_route = False
         for r in capable_free:
             route = planner.route(r["location"], incident["location"], now)
+            if (route is not None and route.arrival_time > incident["deadline"] + _EPS
+                    and route.arrival_time <= incident["deadline"] + 2.0
+                    and hasattr(planner, "route_before_deadline")):
+                route = planner.route_before_deadline(
+                    r["location"], incident["location"], now, incident["deadline"])
             if route is None:
                 continue
             any_route = True

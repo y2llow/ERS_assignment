@@ -112,6 +112,35 @@ def test_probability_equal_to_threshold_is_still_usable():
     assert planner(roads).route("A", "C").path == ["A", "B", "C"]
 
 
+def test_fallback_threshold_used_when_otherwise_unreachable():
+    roads = {("A", "D"): {"Open": 0.2, "Congested": 0.1, "Blocked": 0.7},
+             ("A", "B"): {"Open": 0.2, "Congested": 0.1, "Blocked": 0.7}}
+    result = planner(roads).route("A", "C")
+    assert result is not None
+    # The incremental search stops at the FIRST sufficient threshold (0.7).
+    assert result.threshold_used == 0.7
+
+
+def test_deadline_fallback_finds_faster_riskier_route():
+    # With threshold=0.5 the safe detour A-D-C takes 30 s.
+    # At threshold=0.6 the shorter route A-B-C takes 20 s.
+    roads = {("A", "B"): {"Open": 0.4, "Congested": 0.0, "Blocked": 0.6}}
+    p = planner(roads)
+    default = p.route("A", "C")
+    assert default.path == ["A", "D", "C"]
+    assert default.arrival_time == pytest.approx(30.0)
+
+    alternative = p.route_before_deadline("A", "C", departure_time=0, deadline=25)
+    assert alternative.path == ["A", "B", "C"]
+    assert alternative.arrival_time == pytest.approx(20.0)
+    assert alternative.threshold_used == pytest.approx(0.6)
+
+
+def test_deadline_fallback_preserves_normal_route_when_on_time():
+    p = planner()
+    regular = p.route("A", "C")
+    assert p.route_before_deadline("A", "C", 0, deadline=25) == regular
+
 
 def test_none_when_even_fallback_fails():
     roads = {("A", "D"): {"Open": 0.0, "Congested": 0.05, "Blocked": 0.95},

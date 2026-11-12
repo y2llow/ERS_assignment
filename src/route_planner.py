@@ -1,4 +1,3 @@
-
 """Implements graph search to find suitable routes and calculate estimated travel times.
 
 Edge cost (seconds), for a directed road u -> v entered at simulation time t:
@@ -28,6 +27,11 @@ Blocked handling:
     Continue until fallback_threshold (default 0.9).
     Stop immediately when a route is found.
     Return None if no route is found.
+
+Deadline-aware fallback (route_before_deadline):
+    If the default route misses a deadline, also check progressively higher
+    blocking thresholds and return the first route that arrives in time.
+    It never changes the travel-time formula or the deadline itself.
 
 Assumptions:
     - Status and traffic are independent, so their factors multiply.
@@ -262,6 +266,24 @@ class RoutePlanner:
                 )
 
         return None
+
+
+    def route_before_deadline(self, start, goal, departure_time, deadline):
+        """Try progressively riskier paths ONLY when default route is too late."""
+        original = self.route(start, goal, departure_time)
+        if original is None or original.arrival_time <= deadline + 1e-9:
+            return original
+        current = self.block_threshold
+        while current < self.fallback_threshold - 1e-10:
+            current = min(self.fallback_threshold, round(current + FALLBACK_STEP, 10))
+            found, expanded = self._search(start, goal, departure_time, current)
+            if found is None:
+                continue
+            path, travel_time = found
+            if departure_time + travel_time <= deadline + 1e-9:
+                return RouteResult(path, travel_time, departure_time + travel_time,
+                                   expanded, current)
+        return original
 
     def path_travel_time(
         self,

@@ -62,7 +62,6 @@ def format_statistics(stats: Statistics) -> str:
     unhandled = (", ".join(f"{i} ({r})" for i, r in sorted(stats.unhandled))
                  if stats.unhandled else "none")
     lines = [
-        "Artificial Intelligence Practicum Emergency Response Assignment",
         "System statistics :",
         f"* {stats.incidents_handled} incidents handled",
         f"* {stats.responders_used} responders used",
@@ -74,13 +73,5 @@ def format_statistics(stats: Statistics) -> str:
         f"* Deadlines met among handled incidents : {_pct(stats.deadlines_met_pct_of_handled)}",
         f"* Unhandled incidents : {unhandled}",
         "",
-        "How the statistics are calculated (all times in seconds of simulation time)",
-        "* Handled = a responder was assigned and arrives at the incident.",
-        "* Response time = arrival time - time the incident became known; the average is",
-        "  taken over handled incidents only (unhandled incidents have no arrival time).",
-        "* Deadlines met = handled incidents that arrive at or before their deadline,",
-        "  divided by ALL incidents. Unhandled incidents therefore count as missed.",
-        "* Arrival times are expected values from the planner (road status and traffic are",
-        "  estimated, not observed).",
     ]
     return "\n".join(lines) + "\n"
