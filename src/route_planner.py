@@ -1,10 +1,11 @@
+
 """Implements graph search to find suitable routes and calculate estimated travel times.
 
 Edge cost (seconds), for a directed road u -> v entered at simulation time t:
 
-    cost = distance / speed  *  status_factor(u, v)  *  traffic_factor(u, v, t)
+    cost = distance / speed * status_factor(u, v) * traffic_factor(u, v, t)
 
-status_factor  (Bayesian network, RoadConditionModel)
+status_factor (Bayesian network, RoadConditionModel)
     Blocked roads cannot be used. For usable roads we take the expected factor
     conditioned on "not blocked":
         (P(Open) * 1 + P(Congested) * 1.5) / (P(Open) + P(Congested))
@@ -21,17 +22,18 @@ Search: A* with f = g + h, g in seconds.
     overestimates even if a road were shorter than the straight line.
     h = 0 (heuristic="zero") gives Dijkstra.
 
-Blocked handling: search with `block_threshold` first; if the goal is
-unreachable, retry with the higher `fallback_threshold`; else return None.
+Blocked handling:
+    Search with block_threshold first.
+    If unreachable, increase the threshold by 0.1 and retry.
+    Continue until fallback_threshold (default 0.9).
+    Stop immediately when a route is found.
+    Return None if no route is found.
 
-Assumptions (document in the report):
+Assumptions:
     - Status and traffic are independent, so their factors multiply.
-    - Both factors are >= 1, so travel time >= distance / speed. This keeps
-      h admissible and consistent (a custom multiplier < 1 would break it).
-    - Costs depend on time, so A*/Dijkstra with a closed set is only exact if
-      the FIFO property holds (leaving later never arrives earlier). The HMM
-      multiplier changes in 60 s steps, so this can be violated slightly.
-    - Road status is treated as constant over time (Bayes gives one estimate).
+    - Both factors are >= 1, so travel time >= distance / speed.
+    - Time-dependent costs may slightly violate the FIFO property.
+    - Road status is treated as constant over time.
 """
 
 from __future__ import annotations
@@ -45,29 +47,30 @@ from typing import Any
 CONGESTED_FACTOR = 1.5
 DEFAULT_BLOCK_THRESHOLD = 0.5
 DEFAULT_FALLBACK_THRESHOLD = 0.9
+FALLBACK_STEP = 0.1
 HEURISTICS = ("euclidean", "zero")
 
 
 class RoutePlannerError(ValueError):
-    """Raised for invalid input (unknown node, bad parameters, invalid path)."""
+    """Raised for invalid input."""
 
 
 @dataclass(frozen=True)
 class RouteResult:
     path: list[str]
-    travel_time: float       # seconds
-    arrival_time: float      # simulation time = departure_time + travel_time
-    nodes_expanded: int      # total over all threshold attempts
-    threshold_used: float    # P(Blocked) threshold with which the route was found
+    travel_time: float
+    arrival_time: float
+    nodes_expanded: int
+    threshold_used: float
 
 
 @dataclass(frozen=True)
 class _Edge:
     start: str
     end: str
-    base_time: float             # distance / speed, seconds
+    base_time: float
     p_blocked: float
-    status_factor: float | None  # None -> never usable (no non-blocked mass)
+    status_factor: float | None
 
 
 class RoutePlanner:
@@ -81,11 +84,18 @@ class RoutePlanner:
         heuristic: str = "euclidean",
     ):
         if heuristic not in HEURISTICS:
-            raise RoutePlannerError(f"heuristic must be one of {HEURISTICS}.")
-        for name, value in (("block_threshold", block_threshold),
-                            ("fallback_threshold", fallback_threshold)):
+            raise RoutePlannerError(
+                f"heuristic must be one of {HEURISTICS}."
+            )
+
+        for name, value in (
+            ("block_threshold", block_threshold),
+            ("fallback_threshold", fallback_threshold),
+        ):
             if not 0.0 <= value <= 1.0:
-                raise RoutePlannerError(f"{name} must be between 0 and 1.")
+                raise RoutePlannerError(
+                    f"{name} must be between 0 and 1."
+                )
 
         self.block_threshold = block_threshold
         self.fallback_threshold = fallback_threshold
@@ -94,134 +104,292 @@ class RoutePlanner:
 
         self._coords: dict[str, tuple[float, float]] = {}
         self._adj: dict[str, list[_Edge]] = {}
+
         for node in city_graph["nodes"]:
             node_id = str(node["id"])
             self._adj[node_id] = []
+
             if "x" in node and "y" in node:
-                self._coords[node_id] = (float(node["x"]), float(node["y"]))
+                self._coords[node_id] = (
+                    float(node["x"]),
+                    float(node["y"]),
+                )
 
         self._edges: dict[tuple[str, str], _Edge] = {}
         max_speed = 0.0
         ratios: list[float] = []
+
         for road in city_graph["roads"]:
             u, v = str(road["from"]), str(road["to"])
-            distance, speed = float(road["distance"]), float(road["speed"])
+            distance = float(road["distance"])
+            speed = float(road["speed"])
+
             max_speed = max(max_speed, speed)
 
             dist = road_model.get(u, v)
+
             usable = dist["Open"] + dist["Congested"]
+
             factor = (
-                (dist["Open"] + CONGESTED_FACTOR * dist["Congested"]) / usable
-                if usable > 0 else None
+                (
+                    dist["Open"]
+                    + CONGESTED_FACTOR * dist["Congested"]
+                ) / usable
+                if usable > 0
+                else None
             )
-            edge = _Edge(u, v, distance / speed, dist["Blocked"], factor)
+
+            edge = _Edge(
+                u,
+                v,
+                distance / speed,
+                dist["Blocked"],
+                factor,
+            )
+
             self._adj[u].append(edge)
             self._edges[(u, v)] = edge
 
             if u in self._coords and v in self._coords:
-                straight = math.dist(self._coords[u], self._coords[v])
+                straight = math.dist(
+                    self._coords[u],
+                    self._coords[v],
+                )
+
                 if straight > 0:
                     ratios.append(distance / straight)
 
         self._max_speed = max_speed if max_speed > 0 else 1.0
-        self.heuristic_scale = min(1.0, min(ratios)) if ratios else 1.0
 
-    # ------------------------------------------------------------------ API
+        self.heuristic_scale = (
+            min(1.0, min(ratios))
+            if ratios
+            else 1.0
+        )
+
+    # -------------------------------------------------- API
+
     def heuristic(self, node: str, goal: str) -> float:
-        """Lower bound (seconds) on the travel time from node to goal."""
+        """Lower bound on travel time in seconds."""
+
         if self.heuristic_name == "zero":
             return 0.0
-        a, b = self._coords.get(node), self._coords.get(goal)
+
+        a = self._coords.get(node)
+        b = self._coords.get(goal)
+
         if a is None or b is None:
             return 0.0
-        return self.heuristic_scale * math.dist(a, b) / self._max_speed
+
+        return (
+            self.heuristic_scale
+            * math.dist(a, b)
+            / self._max_speed
+        )
 
     def route(
-        self, start: str, goal: str, departure_time: float = 0.0
+        self,
+        start: str,
+        goal: str,
+        departure_time: float = 0.0,
     ) -> RouteResult | None:
-        """Cheapest route, or None if the goal is unreachable.
+        """Find the cheapest route using incremental fallback thresholds."""
 
-        Raises RoutePlannerError for an unknown node or a negative departure time.
-        """
         for node in (start, goal):
             if node not in self._adj:
-                raise RoutePlannerError(f"Unknown node {node!r}.")
+                raise RoutePlannerError(
+                    f"Unknown node {node!r}."
+                )
+
         if departure_time < 0:
-            raise RoutePlannerError("departure_time must not be negative.")
+            raise RoutePlannerError(
+                "departure_time must not be negative."
+            )
 
         if start == goal:
-            return RouteResult([start], 0.0, departure_time, 0, self.block_threshold)
+            return RouteResult(
+                [start],
+                0.0,
+                departure_time,
+                0,
+                self.block_threshold,
+            )
+
+        # Incremental fallback:
+        # 0.5 -> 0.6 -> 0.7 -> 0.8 -> 0.9
+        #
+        # A* is executed again for every threshold.
+        # Stop immediately when a route is found.
 
         thresholds = [self.block_threshold]
+
         if self.fallback_threshold > self.block_threshold:
-            thresholds.append(self.fallback_threshold)
+            current = self.block_threshold
+
+            while True:
+                next_threshold = round(
+                    current + FALLBACK_STEP, 10
+                )
+
+                if next_threshold >= self.fallback_threshold:
+                    thresholds.append(self.fallback_threshold)
+                    break
+
+                thresholds.append(next_threshold)
+                current = next_threshold
 
         expanded_total = 0
+
         for threshold in thresholds:
-            found, expanded = self._search(start, goal, departure_time, threshold)
+            found, expanded = self._search(
+                start,
+                goal,
+                departure_time,
+                threshold,
+            )
+
             expanded_total += expanded
+
             if found is not None:
                 path, travel_time = found
+
                 return RouteResult(
-                    path, travel_time, departure_time + travel_time,
-                    expanded_total, threshold,
+                    path,
+                    travel_time,
+                    departure_time + travel_time,
+                    expanded_total,
+                    threshold,
                 )
+
         return None
 
-    def path_travel_time(self, path: list[str], departure_time: float = 0.0) -> float:
-        """Expected travel time (s) of a given path; useful for validation.
+    def path_travel_time(
+        self,
+        path: list[str],
+        departure_time: float = 0.0,
+    ) -> float:
+        """Calculate expected travel time for a given path."""
 
-        Does not apply the blocked threshold, but raises RoutePlannerError if a
-        road does not exist or can never be used.
-        """
         elapsed = 0.0
+
         for u, v in zip(path, path[1:]):
             edge = self._edges.get((u, v))
+
             if edge is None:
-                raise RoutePlannerError(f"No road {u!r} -> {v!r}.")
+                raise RoutePlannerError(
+                    f"No road {u!r} -> {v!r}."
+                )
+
             if edge.status_factor is None:
-                raise RoutePlannerError(f"Road {u!r} -> {v!r} is certainly blocked.")
-            elapsed += self._edge_time(edge, departure_time + elapsed)
+                raise RoutePlannerError(
+                    f"Road {u!r} -> {v!r} is certainly blocked."
+                )
+
+            elapsed += self._edge_time(
+                edge,
+                departure_time + elapsed,
+            )
+
         return elapsed
 
-    # ------------------------------------------------------------- internals
-    def _edge_time(self, edge: _Edge, horizon: float) -> float:
-        traffic = self._traffic.expected_multiplier(edge.start, edge.end, horizon)
-        return edge.base_time * edge.status_factor * traffic
+    # --------------------------------------------- Internals
 
-    def _search(self, start, goal, departure_time, threshold):
-        counter = itertools.count()  # deterministic tie-breaking
+    def _edge_time(
+        self,
+        edge: _Edge,
+        horizon: float,
+    ) -> float:
+        traffic = self._traffic.expected_multiplier(
+            edge.start,
+            edge.end,
+            horizon,
+        )
+
+        return (
+            edge.base_time
+            * edge.status_factor
+            * traffic
+        )
+
+    def _search(
+        self,
+        start,
+        goal,
+        departure_time,
+        threshold,
+    ):
+        counter = itertools.count()
+
         best_g = {start: 0.0}
         parent: dict[str, str] = {}
-        heap = [(self.heuristic(start, goal), next(counter), start)]
+
+        heap = [
+            (
+                self.heuristic(start, goal),
+                next(counter),
+                start,
+            )
+        ]
+
         closed: set[str] = set()
         expanded = 0
 
         while heap:
             _, _, node = heapq.heappop(heap)
+
             if node in closed:
                 continue
+
             closed.add(node)
             expanded += 1
 
             if node == goal:
                 path = [node]
+
                 while path[-1] in parent:
                     path.append(parent[path[-1]])
+
                 path.reverse()
-                return (path, best_g[goal]), expanded
+
+                return (
+                    path,
+                    best_g[goal],
+                ), expanded
 
             for edge in self._adj[node]:
-                if edge.status_factor is None or edge.p_blocked > threshold:
+
+                if (
+                    edge.status_factor is None
+                    or edge.p_blocked > threshold
+                ):
                     continue
+
                 if edge.end in closed:
                     continue
-                new_g = best_g[node] + self._edge_time(edge, departure_time + best_g[node])
-                if new_g < best_g.get(edge.end, math.inf):
+
+                new_g = (
+                    best_g[node]
+                    + self._edge_time(
+                        edge,
+                        departure_time + best_g[node],
+                    )
+                )
+
+                if new_g < best_g.get(
+                    edge.end,
+                    math.inf,
+                ):
                     best_g[edge.end] = new_g
                     parent[edge.end] = node
+
                     heapq.heappush(
                         heap,
-                        (new_g + self.heuristic(edge.end, goal), next(counter), edge.end),
+                        (
+                            new_g
+                            + self.heuristic(edge.end, goal),
+                            next(counter),
+                            edge.end,
+                        ),
                     )
+
         return None, expanded
