@@ -1,43 +1,14 @@
-"""Implements graph search to find suitable routes and calculate estimated travel times.
 
-Edge cost (seconds), for a directed road u -> v entered at simulation time t:
+"""A* route planning with Bayesian road status and HMM traffic.
 
-    cost = distance / speed * status_factor(u, v) * traffic_factor(u, v, t)
+Edge travel time:
+    base_time * max(status_factor, traffic_factor)
 
-status_factor (Bayesian network, RoadConditionModel)
-    Blocked roads cannot be used. For usable roads we take the expected factor
-    conditioned on "not blocked":
-        (P(Open) * 1 + P(Congested) * 1.5) / (P(Open) + P(Congested))
-    A road is EXCLUDED when P(Blocked) > threshold.
+This assumes that the two congestion estimates may overlap.
+This is a modelling assumption, not an empirically verified result.
 
-traffic_factor (HMM, TrafficModel)
-    TrafficModel.expected_multiplier(u, v, horizon), where horizon is the
-    time since simulation time 0 (departure_time + time already travelled),
-    because the HMM belief is anchored at time 0.
-
-Search: A* with f = g + h, g in seconds.
-    h(n) = scale * euclidean(n, goal) / max_speed
-    `scale` = min(1, min over roads of distance / euclidean), so h never
-    overestimates even if a road were shorter than the straight line.
-    h = 0 (heuristic="zero") gives Dijkstra.
-
-Blocked handling:
-    Search with block_threshold first.
-    If unreachable, increase the threshold by 0.1 and retry.
-    Continue until fallback_threshold (default 0.9).
-    Stop immediately when a route is found.
-    Return None if no route is found.
-
-Deadline-aware fallback (route_before_deadline):
-    If the default route misses a deadline, also check progressively higher
-    blocking thresholds and return the first route that arrives in time.
-    It never changes the travel-time formula or the deadline itself.
-
-Assumptions:
-    - Status and traffic are independent, so their factors multiply.
-    - Both factors are >= 1, so travel time >= distance / speed.
-    - Time-dependent costs may slightly violate the FIFO property.
-    - Road status is treated as constant over time.
+Roads above the current blocking threshold are excluded.
+A fallback can search progressively riskier routes when needed.
 """
 
 from __future__ import annotations
@@ -48,6 +19,7 @@ import math
 from dataclasses import dataclass
 from typing import Any
 
+
 CONGESTED_FACTOR = 1.5
 DEFAULT_BLOCK_THRESHOLD = 0.5
 DEFAULT_FALLBACK_THRESHOLD = 0.9
@@ -56,7 +28,7 @@ HEURISTICS = ("euclidean", "zero")
 
 
 class RoutePlannerError(ValueError):
-    """Raised for invalid input."""
+    """Raised for invalid route planner input."""
 
 
 @dataclass(frozen=True)
@@ -124,7 +96,9 @@ class RoutePlanner:
         ratios: list[float] = []
 
         for road in city_graph["roads"]:
-            u, v = str(road["from"]), str(road["to"])
+            u = str(road["from"])
+            v = str(road["to"])
+
             distance = float(road["distance"])
             speed = float(road["speed"])
 
@@ -171,10 +145,8 @@ class RoutePlanner:
             else 1.0
         )
 
-    # -------------------------------------------------- API
-
     def heuristic(self, node: str, goal: str) -> float:
-        """Lower bound on travel time in seconds."""
+        """Admissible lower bound on travel time."""
 
         if self.heuristic_name == "zero":
             return 0.0
@@ -197,7 +169,7 @@ class RoutePlanner:
         goal: str,
         departure_time: float = 0.0,
     ) -> RouteResult | None:
-        """Find the cheapest route using incremental fallback thresholds."""
+        """Find a route with incremental blocking thresholds."""
 
         for node in (start, goal):
             if node not in self._adj:
@@ -218,12 +190,6 @@ class RoutePlanner:
                 0,
                 self.block_threshold,
             )
-
-        # Incremental fallback:
-        # 0.5 -> 0.6 -> 0.7 -> 0.8 -> 0.9
-        #
-        # A* is executed again for every threshold.
-        # Stop immediately when a route is found.
 
         thresholds = [self.block_threshold]
 
@@ -267,22 +233,57 @@ class RoutePlanner:
 
         return None
 
+    def route_before_deadline(
+        self,
+        start,
+        goal,
+        departure_time,
+        deadline,
+    ):
+        """Search for a timely alternative if the normal route is late."""
 
-    def route_before_deadline(self, start, goal, departure_time, deadline):
-        """Try progressively riskier paths ONLY when default route is too late."""
-        original = self.route(start, goal, departure_time)
-        if original is None or original.arrival_time <= deadline + 1e-9:
+        original = self.route(
+            start,
+            goal,
+            departure_time,
+        )
+
+        if (
+            original is None
+            or original.arrival_time <= deadline + 1e-9
+        ):
             return original
+
         current = self.block_threshold
+
         while current < self.fallback_threshold - 1e-10:
-            current = min(self.fallback_threshold, round(current + FALLBACK_STEP, 10))
-            found, expanded = self._search(start, goal, departure_time, current)
+            current = min(
+                self.fallback_threshold,
+                round(current + FALLBACK_STEP, 10),
+            )
+
+            found, expanded = self._search(
+                start,
+                goal,
+                departure_time,
+                current,
+            )
+
             if found is None:
                 continue
+
             path, travel_time = found
-            if departure_time + travel_time <= deadline + 1e-9:
-                return RouteResult(path, travel_time, departure_time + travel_time,
-                                   expanded, current)
+            arrival_time = departure_time + travel_time
+
+            if arrival_time <= deadline + 1e-9:
+                return RouteResult(
+                    path,
+                    travel_time,
+                    arrival_time,
+                    expanded,
+                    current,
+                )
+
         return original
 
     def path_travel_time(
@@ -290,7 +291,7 @@ class RoutePlanner:
         path: list[str],
         departure_time: float = 0.0,
     ) -> float:
-        """Calculate expected travel time for a given path."""
+        """Calculate travel time for an existing path."""
 
         elapsed = 0.0
 
@@ -314,23 +315,24 @@ class RoutePlanner:
 
         return elapsed
 
-    # --------------------------------------------- Internals
-
     def _edge_time(
         self,
         edge: _Edge,
         horizon: float,
     ) -> float:
+        """Calculate the expected travel time of one edge."""
+
         traffic = self._traffic.expected_multiplier(
             edge.start,
             edge.end,
             horizon,
         )
 
-        return (
-            edge.base_time
-            * edge.status_factor
-            * traffic
+        # Alternative assumption:
+        # the two congestion estimates may overlap.
+        return edge.base_time * max(
+            edge.status_factor,
+            traffic,
         )
 
     def _search(
@@ -340,6 +342,8 @@ class RoutePlanner:
         departure_time,
         threshold,
     ):
+        """A* search for a given blocking threshold."""
+
         counter = itertools.count()
 
         best_g = {start: 0.0}
