@@ -49,7 +49,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-DEFAULT_PRIORITY_WEIGHTS = {"Critical": 10.0, "High": 5.0, "Medium": 2.0, "Low": 1.0}
+DEFAULT_PRIORITY_WEIGHTS = {"Critical": 10.0, "High": 10.0, "Medium": 3.0, "Low": 1.0}
 DEFAULT_MAX_NODES = 200_000
 _EPS = 1e-9
 
