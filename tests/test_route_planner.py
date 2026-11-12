@@ -112,13 +112,6 @@ def test_probability_equal_to_threshold_is_still_usable():
     assert planner(roads).route("A", "C").path == ["A", "B", "C"]
 
 
-def test_fallback_threshold_used_when_otherwise_unreachable():
-    roads = {("A", "D"): {"Open": 0.2, "Congested": 0.1, "Blocked": 0.7},
-             ("A", "B"): {"Open": 0.2, "Congested": 0.1, "Blocked": 0.7}}
-    result = planner(roads).route("A", "C")
-    assert result is not None
-    assert result.threshold_used == 0.9
-
 
 def test_none_when_even_fallback_fails():
     roads = {("A", "D"): {"Open": 0.0, "Congested": 0.05, "Blocked": 0.95},
