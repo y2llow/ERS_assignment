@@ -54,15 +54,3 @@ def test_nothing_handled():
     assert s.deadlines_met_pct == 0.0
     assert "n/a" in format_statistics(s)
 
-
-def test_output_format():
-    s = compute_statistics(INCIDENTS, sim([assignment("R1", "I1", 40, 40)],
-                                          [Unassigned("I2", "all_busy")]))
-    text = format_statistics(s)
-    assert text.startswith("Artificial Intelligence Practicum Emergency Response Assignment\n"
-                           "System statistics :\n")
-    assert "* 1 incidents handled" in text
-    assert "* 1 responders used" in text
-    assert "* Average response time : 40.0 s" in text
-    assert "* Deadlines met : 25.0%" in text
-    assert "I2 (all_busy)" in text

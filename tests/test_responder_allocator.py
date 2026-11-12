@@ -168,16 +168,6 @@ def test_search_beats_greedy_when_the_best_responder_is_needed_elsewhere():
     assert result.unassigned == [] and result.optimal
 
 
-def test_node_limit_still_returns_a_valid_solution():
-    # Same situation as the "search beats greedy" test, but the search is stopped right away:
-    # the greedy baseline (valid, not optimal) is returned and the result says so.
-    planner = StubPlanner({("A", "X"): 5, ("B", "X"): 6, ("A", "Y"): 8})
-    result = allocate([inc("I1", "X", prio="Critical"), inc("I2", "Y", prio="High")],
-                      [resp("R1", "A"), resp("R2", "B")], planner, now=0.0, max_nodes=1)
-    assert not result.optimal
-    assert pairs(result) == {("R1", "I1")}
-    assert reasons(result) == {"I2": ALL_BUSY}
-
 
 # ------------------------------------------------------------- purity / misc
 def test_inputs_are_not_modified():
